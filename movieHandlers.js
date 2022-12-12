@@ -8,7 +8,7 @@ const getMovies = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).send("Error retrieving data from database");
+      res.status(500).send("Error retrieving data from db.");
     });
 };
 
@@ -18,15 +18,15 @@ const getMovieById = (req, res) => {
   database
     .query("select * from movies where id = ?", [id])
     .then(([movies]) => {
-      if (movies[0] != null) {
+      if (movies.length > 0) {
         res.json(movies[0]);
       } else {
-        res.status(404).send("Not Found");
+        res.status(404).send("Movie not found...");
       }
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).send("Error retrieving data from database");
+      res.status(500).send("Error retrieving data from db.");
     });
 };
 
@@ -47,13 +47,13 @@ const postMovie = (req, res) => {
     });
 };
 
-const updateMovie = (req, res) => {
+const putMovie = (req, res) => {
   const id = parseInt(req.params.id);
   const { title, director, year, color, duration } = req.body;
 
   database
     .query(
-      "update movies set title = ?, director = ?, year = ?, color = ?, duration = ? where id = ?",
+      "UPDATE movies SET title = ?, director = ?, year = ?, color = ?, duration = ? WHERE id = ?",
       [title, director, year, color, duration, id]
     )
     .then(([result]) => {
@@ -65,7 +65,25 @@ const updateMovie = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).send("Error editing the movie");
+      res.status(500).send("Error saving the movie");
+    });
+};
+
+const deleteMovie = (req, res) => {
+  const id = parseInt(req.params.id);
+
+  database
+    .query("DELETE FROM movies WHERE id = ?", [id])
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.status(404).send("Not Found");
+      } else {
+        res.sendStatus(204);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error deleting the movie");
     });
 };
 
@@ -73,5 +91,6 @@ module.exports = {
   getMovies,
   getMovieById,
   postMovie,
-  updateMovie,
+  putMovie,
+  deleteMovie,
 };
